@@ -26,7 +26,7 @@ class StudentRead(BaseModel):
 class StudentUpdate(BaseModel):
     name: str | None = None
     email: str | None = None
-    age: int | None = None
+    age: int | None = Field(default=None, gt=0)
 
 
 class CourseCreate(BaseModel):
