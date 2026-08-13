@@ -1,0 +1,172 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f4f7fb;
+  color: #1f2937;
+  font-family: Arial, sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.dashboard {
+  width: min(100% - 2rem, 960px);
+  margin: 0 auto;
+  padding: 3rem 0;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header h1,
+.section-heading h2,
+.panel h2 {
+  margin: 0;
+}
+
+.page-header p:last-child {
+  color: #526174;
+}
+
+.eyebrow {
+  margin: 0 0 0.4rem;
+  color: #2563eb;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.panel {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border: 1px solid #dbe3ef;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgba(31, 41, 55, 0.06);
+}
+
+#student-form {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr auto;
+  gap: 1rem;
+  align-items: end;
+  margin-top: 1rem;
+}
+
+label {
+  display: grid;
+  gap: 0.4rem;
+  font-weight: 600;
+}
+
+input {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #b9c6d8;
+  border-radius: 6px;
+}
+
+button {
+  padding: 0.7rem 1rem;
+  border: 0;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+#status-message {
+  min-height: 1.25rem;
+  margin: 1rem 0 0;
+  color: #b42318;
+}
+
+#status-message.success {
+  color: #157f3d;
+}
+
+.section-heading {
+  margin-bottom: 1rem;
+}
+
+.roster-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.student-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem 1rem;
+  padding: 1.25rem;
+  border: 1px solid #dbe3ef;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 3px 10px rgba(31, 41, 55, 0.05);
+}
+
+.student-card h3,
+.student-card p {
+  margin: 0;
+}
+
+.student-email {
+  grid-column: 1 / -1;
+  color: #526174;
+  overflow-wrap: anywhere;
+}
+
+.age-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: end;
+}
+
+.delete-button {
+  align-self: end;
+  background: #b42318;
+}
+
+.delete-button:hover {
+  background: #8e1d14;
+}
+
+.empty-roster {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #526174;
+}
+
+@media (max-width: 600px) {
+  .dashboard {
+    padding: 2rem 0;
+  }
+
+  #student-form,
+  .roster-list,
+  .student-card {
+    grid-template-columns: 1fr;
+  }
+
+  .age-editor {
+    grid-template-columns: 1fr;
+  }
+
+  .delete-button {
+    width: 100%;
+  }
+}
