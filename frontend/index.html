@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyTrack Student Roster</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="dashboard">
+    <header class="page-header">
+      <p class="eyebrow">StudyTrack</p>
+      <h1>Student Roster</h1>
+      <p>Keep your class list current in one place.</p>
+    </header>
+
+    <section class="panel" aria-labelledby="add-student-heading">
+      <h2 id="add-student-heading">Add a student</h2>
+      <form id="student-form">
+        <label>
+          Name
+          <input id="student-name" name="name" type="text" required>
+        </label>
+        <label>
+          Email
+          <input id="student-email" name="email" type="email" required>
+        </label>
+        <label>
+          Age
+          <input id="student-age" name="age" type="number" min="1" required>
+        </label>
+        <button type="submit">Add Student</button>
+      </form>
+      <p id="status-message" role="status" aria-live="polite"></p>
+    </section>
+
+    <section aria-labelledby="roster-heading">
+      <div class="section-heading">
+        <h2 id="roster-heading">Current students</h2>
+      </div>
+      <div id="roster-list" class="roster-list" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
