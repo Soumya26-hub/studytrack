@@ -5,6 +5,7 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from . import crud
@@ -67,7 +68,14 @@ def student_to_dict(student):
 
 @app.post("/students/", response_model=StudentRead, status_code=status.HTTP_201_CREATED)
 def create_student(student_data: StudentCreate, db: Session = Depends(get_db)):
-    return crud.create_student(db, student_data)
+    try:
+        return crud.create_student(db, student_data)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A student with this email already exists.",
+        )
 
 
 @app.get("/students/", response_model=list[StudentRead])
@@ -126,7 +134,14 @@ def update_student(
     student_update: StudentUpdate,
     db: Session = Depends(get_db),
 ):
-    student = crud.update_student(db, student_id, student_update)
+    try:
+        student = crud.update_student(db, student_id, student_update)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A student with this email already exists.",
+        )
     if student is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
     return student

@@ -73,6 +73,10 @@ input {
   border-radius: 6px;
 }
 
+input[data-age-input] {
+  min-width: 70px;
+}
+
 button {
   padding: 0.7rem 1rem;
   border: 0;
@@ -97,6 +101,20 @@ button:hover {
   color: #157f3d;
 }
 
+#error-banner {
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #dc2626;
+  border-radius: 6px;
+  background-color: #fee2e2;
+  color: #991b1b;
+  display: none;
+}
+
+#error-banner:not(:empty) {
+  display: block;
+}
+
 .section-heading {
   margin-bottom: 1rem;
 }
@@ -105,13 +123,18 @@ button:hover {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
+  padding: 1rem;
+  margin: 0;
+  border: 1px solid #dbe3ef;
+  border-radius: 10px;
 }
 
 .student-card {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.75rem 1rem;
   padding: 1.25rem;
+  margin: 0;
   border: 1px solid #dbe3ef;
   border-radius: 10px;
   background: #ffffff;

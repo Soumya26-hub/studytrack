@@ -1,10 +1,19 @@
 const studentForm = document.querySelector("#student-form");
 const rosterList = document.querySelector("#roster-list");
 const statusMessage = document.querySelector("#status-message");
+const errorBanner = document.querySelector("#error-banner");
 
 function showStatus(message, isSuccess = false) {
   statusMessage.textContent = message;
   statusMessage.classList.toggle("success", isSuccess);
+}
+
+function showError(message) {
+  errorBanner.textContent = message;
+}
+
+function clearError() {
+  errorBanner.textContent = "";
 }
 
 async function getErrorMessage(response) {
@@ -26,6 +35,44 @@ function createButton(label, action, studentId, className = "") {
   return button;
 }
 
+function createStudentCard(student) {
+  const card = document.createElement("article");
+  card.className = "student-card";
+  card.dataset.studentId = student.id;
+
+  const name = document.createElement("h3");
+  name.textContent = student.name;
+
+  const currentAge = document.createElement("p");
+  currentAge.className = "current-age";
+  currentAge.textContent = `Current age: ${student.age}`;
+
+  const email = document.createElement("p");
+  email.className = "student-email";
+  email.textContent = student.email;
+
+  const ageEditor = document.createElement("div");
+  ageEditor.className = "age-editor";
+  const ageLabel = document.createElement("label");
+  ageLabel.textContent = "Edit age";
+  const ageInput = document.createElement("input");
+  ageInput.type = "number";
+  ageInput.min = "1";
+  ageInput.value = student.age;
+  ageInput.dataset.ageInput = student.id;
+  ageLabel.append(ageInput);
+  ageEditor.append(ageLabel, createButton("Save Age", "save-age", student.id));
+
+  card.append(
+    name,
+    currentAge,
+    email,
+    ageEditor,
+    createButton("Delete", "delete", student.id, "delete-button"),
+  );
+  return card;
+}
+
 function renderStudents(students) {
   rosterList.replaceChildren();
 
@@ -38,39 +85,7 @@ function renderStudents(students) {
   }
 
   students.forEach((student) => {
-    const card = document.createElement("article");
-    card.className = "student-card";
-
-    const name = document.createElement("h3");
-    name.textContent = student.name;
-
-    const currentAge = document.createElement("p");
-    currentAge.textContent = `Current age: ${student.age}`;
-
-    const email = document.createElement("p");
-    email.className = "student-email";
-    email.textContent = student.email;
-
-    const ageEditor = document.createElement("div");
-    ageEditor.className = "age-editor";
-    const ageLabel = document.createElement("label");
-    ageLabel.textContent = "Edit age";
-    const ageInput = document.createElement("input");
-    ageInput.type = "number";
-    ageInput.min = "1";
-    ageInput.value = student.age;
-    ageInput.dataset.ageInput = student.id;
-    ageLabel.append(ageInput);
-    ageEditor.append(ageLabel, createButton("Save Age", "save-age", student.id));
-
-    card.append(
-      name,
-      currentAge,
-      email,
-      ageEditor,
-      createButton("Delete", "delete", student.id, "delete-button"),
-    );
-    rosterList.append(card);
+    rosterList.append(createStudentCard(student));
   });
 }
 
@@ -80,10 +95,11 @@ async function loadStudents() {
     if (!response.ok) {
       throw new Error(await getErrorMessage(response));
     }
+    clearError();
     renderStudents(await response.json());
   } catch (error) {
     rosterList.replaceChildren();
-    showStatus(`Could not load students: ${error.message}`);
+    showError(`Could not load students: ${error.message}`);
   }
 }
 
@@ -105,11 +121,13 @@ async function addStudent(event) {
     if (!response.ok) {
       throw new Error(await getErrorMessage(response));
     }
+    const newStudent = await response.json();
     studentForm.reset();
+    clearError();
     showStatus("Student added successfully.", true);
-    await loadStudents();
+    rosterList.append(createStudentCard(newStudent));
   } catch (error) {
-    showStatus(`Could not add student: ${error.message}`);
+    showError(`Could not add student: ${error.message}`);
   }
 }
 
@@ -129,10 +147,20 @@ async function updateAge(studentId, ageInput) {
     if (!response.ok) {
       throw new Error(await getErrorMessage(response));
     }
+    const updatedStudent = await response.json();
+    clearError();
     showStatus("Student age updated successfully.", true);
-    await loadStudents();
+
+    // Update the card directly
+    const card = rosterList.querySelector(`[data-student-id="${studentId}"]`);
+    if (card) {
+      const currentAgeElement = card.querySelector(".current-age");
+      if (currentAgeElement) {
+        currentAgeElement.textContent = `Current age: ${updatedStudent.age}`;
+      }
+    }
   } catch (error) {
-    showStatus(`Could not update age: ${error.message}`);
+    showError(`Could not update age: ${error.message}`);
   }
 }
 
@@ -142,14 +170,29 @@ async function deleteStudent(studentId) {
     if (!response.ok) {
       throw new Error(await getErrorMessage(response));
     }
+    clearError();
     showStatus("Student deleted successfully.", true);
-    await loadStudents();
+
+    // Remove the card directly
+    const card = rosterList.querySelector(`[data-student-id="${studentId}"]`);
+    if (card) {
+      card.remove();
+
+      // Show empty message if no more students
+      if (rosterList.children.length === 0) {
+        const message = document.createElement("p");
+        message.className = "empty-roster";
+        message.textContent = "No students have been added yet.";
+        rosterList.append(message);
+      }
+    }
   } catch (error) {
-    showStatus(`Could not delete student: ${error.message}`);
+    showError(`Could not delete student: ${error.message}`);
   }
 }
 
 studentForm.addEventListener("submit", addStudent);
+studentForm.addEventListener("input", clearError);
 
 // One listener handles buttons in current and future roster cards.
 rosterList.addEventListener("click", async (event) => {
