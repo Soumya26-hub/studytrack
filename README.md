@@ -38,7 +38,7 @@ venv\Scripts\activate
 Install the dependencies:
 
 ```bash
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 ```
 
 Start the application:
@@ -49,15 +49,14 @@ uvicorn backend.main:app --reload
 
 Open the application:
 
-```text
+
 http://localhost:8000
-```
+
 
 API documentation:
 
-```text
 http://localhost:8000/docs
-```
+
 
 ## Part 1 – Student Roster
 
@@ -84,17 +83,17 @@ Part 2 adds student search, sorting, and reporting functionality.
 
 ### Main Endpoints
 
-```text
+
 GET /students/search
 GET /students/sorted
 GET /students/report
-```
+
 
 The algorithm implementations are in:
 
-```text
+
 backend/algorithms.py
-```
+
 ## Complexity
 
 - **Insertion sort:** O(n²) time in the worst case and O(1) extra space.
@@ -111,9 +110,9 @@ The dashboard includes an AI Helper with two features:
 
 ### Summarize Notes
 
-```text
+
 POST /assistant/summarize
-```
+
 
 The endpoint accepts study notes and returns:
 
@@ -134,9 +133,9 @@ The mock summarizer:
 
 ### Search Notes
 
-```text
+
 GET /assistant/search?query=<text>
-```
+
 
 The search uses a fixed set of study notes, mock word-count embeddings,
 and cosine similarity to rank the results.
@@ -155,8 +154,8 @@ No API key, internet connection, or external AI service is required.
 The project uses offline mock mode for grading. If a real LLM mode were
 implemented, the following prompt would be used:
 
-You are a study note summarizer. Analyze the provided study notes and return
-a JSON object with exactly these keys:
+
+You are a study note summarizer. Analyze the provided study notes and return a JSON object with exactly these keys:
 
 {
   "topic": "<first non-empty line of input; 'untitled' if input is empty>",
@@ -167,7 +166,7 @@ a JSON object with exactly these keys:
 - Extract the topic from the first non-empty line.
 - Extract up to 3 non-empty sentences by splitting on . ! ?
 - Count the total words and apply the difficulty thresholds.
-- Return only valid JSON.
+- Return ONLY valid JSON. Do not include explanations, markdown, or any other text.
 - For empty input, return:
   {
     "topic": "untitled",
@@ -178,9 +177,10 @@ a JSON object with exactly these keys:
 Input notes:
 <raw study notes>
 
+
 ## Project Structure
 
-```text
+
 studytrack/
 ├── backend/
 │   ├── algorithms.py
@@ -199,7 +199,7 @@ studytrack/
 ├── .gitignore
 ├── requirements.txt
 └── README.md
-```
+
 
 ## Security
 
