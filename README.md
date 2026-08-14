@@ -151,31 +151,36 @@ No API key, internet connection, or external AI service is required.
 
 ## Real LLM Prompt
 
-The project uses offline mock mode for grading. If a real LLM mode were
-implemented, the following prompt would be used:
+The project uses offline mock mode for grading. If a real LLM mode were implemented, this is the prompt that would be used:
 
+```text
+You are a study note summarizer.
 
-You are a study note summarizer. Analyze the provided study notes and return a JSON object with exactly these keys:
+Task:
+Summarize the study notes provided below and return a JSON object with exactly these three keys:
+- topic
+- key_points
+- difficulty
 
-{
-  "topic": "<first non-empty line of input; 'untitled' if input is empty>",
-  "key_points": [<list of up to 3 key points extracted from sentences, or empty list if input is empty>],
-  "difficulty": "<'easy' if < 40 words, 'medium' if 40–100 words, 'hard' if > 100 words>"
-}
+Rules:
+1. topic: Use the first non-empty line of the notes after stripping whitespace. If the input is empty or contains only whitespace, use "untitled".
+2. key_points: Split the notes into sentences using ., !, or ? as delimiters. Return up to the first 3 non-empty sentences after stripping whitespace. For empty input, return [].
+3. difficulty: Count the total number of words in the input:
+   - fewer than 40 words: "easy"
+   - 40 to 100 words: "medium"
+   - more than 100 words: "hard"
+   - an empty input has 0 words and is therefore "easy".
 
-- Extract the topic from the first non-empty line.
-- Extract up to 3 non-empty sentences by splitting on . ! ?
-- Count the total words and apply the difficulty thresholds.
-- Return ONLY valid JSON. Do not include explanations, markdown, or any other text.
-- For empty input, return:
-  {
-    "topic": "untitled",
-    "key_points": [],
-    "difficulty": "easy"
-  }
+Constraints:
+- Return exactly the three keys: topic, key_points, difficulty.
+- Do not add any other keys.
+- Return only valid JSON.
+- Do not include explanations, markdown, or any text outside the JSON object.
+- Use the rules above deterministically.
 
 Input notes:
 <raw study notes>
+```
 
 
 ## Project Structure
@@ -189,6 +194,7 @@ studytrack/
 │   ├── database.py
 │   ├── main.py
 │   ├── models.py
+│   ├── requirements.txt
 │   ├── schemas.py
 │   └── seed_data.py
 ├── frontend/
@@ -197,7 +203,6 @@ studytrack/
 │   └── style.css
 ├── .env.example
 ├── .gitignore
-├── requirements.txt
 └── README.md
 
 
