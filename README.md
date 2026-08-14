@@ -150,6 +150,34 @@ Part 3 uses an offline mock implementation.
 
 No API key, internet connection, or external AI service is required.
 
+## Real LLM Prompt
+
+The project uses offline mock mode for grading. If a real LLM mode were
+implemented, the following prompt would be used:
+
+You are a study note summarizer. Analyze the provided study notes and return
+a JSON object with exactly these keys:
+
+{
+  "topic": "<first non-empty line of input; 'untitled' if input is empty>",
+  "key_points": [<list of up to 3 key points extracted from sentences, or empty list if input is empty>],
+  "difficulty": "<'easy' if < 40 words, 'medium' if 40–100 words, 'hard' if > 100 words>"
+}
+
+- Extract the topic from the first non-empty line.
+- Extract up to 3 non-empty sentences by splitting on . ! ?
+- Count the total words and apply the difficulty thresholds.
+- Return only valid JSON.
+- For empty input, return:
+  {
+    "topic": "untitled",
+    "key_points": [],
+    "difficulty": "easy"
+  }
+
+Input notes:
+<raw study notes>
+
 ## Project Structure
 
 ```text
