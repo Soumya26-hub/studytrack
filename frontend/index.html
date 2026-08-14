@@ -7,12 +7,21 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <nav aria-label="Main navigation">
+    <ul>
+      <li><a href="#student-form">Add Student</a></li>
+      <li><a href="#roster-heading">Roster</a></li>
+    </ul>
+  </nav>
+
   <main class="dashboard">
     <header class="page-header">
       <p class="eyebrow">StudyTrack</p>
       <h1>Student Roster</h1>
       <p>Keep your class list current in one place.</p>
     </header>
+
+    <div id="error-banner" class="error-banner"></div>
 
     <section class="panel" aria-labelledby="add-student-heading">
       <h2 id="add-student-heading">Add a student</h2>
@@ -41,6 +50,10 @@
       <div id="roster-list" class="roster-list" aria-live="polite"></div>
     </section>
   </main>
+
+  <footer>
+    <p>&copy; StudyTrack - Keep your class list current in one place.</p>
+  </footer>
 
   <script src="app.js"></script>
 </body>
