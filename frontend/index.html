@@ -7,12 +7,21 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <nav aria-label="Main navigation">
+    <ul>
+      <li><a href="#student-form">Add Student</a></li>
+      <li><a href="#roster-heading">Roster</a></li>
+    </ul>
+  </nav>
+
   <main class="dashboard">
     <header class="page-header">
       <p class="eyebrow">StudyTrack</p>
       <h1>Student Roster</h1>
       <p>Keep your class list current in one place.</p>
     </header>
+
+    <div id="error-banner" class="error-banner"></div>
 
     <section class="panel" aria-labelledby="add-student-heading">
       <h2 id="add-student-heading">Add a student</h2>
@@ -40,7 +49,37 @@
       </div>
       <div id="roster-list" class="roster-list" aria-live="polite"></div>
     </section>
+
+    <section class="panel" aria-labelledby="ai-helper-heading">
+      <h2 id="ai-helper-heading">AI Helper</h2>
+
+      <div class="ai-section">
+        <h3>Summarize Study Notes</h3>
+        <label for="notes-textarea">Study Notes</label>
+        <textarea id="notes-textarea" placeholder="Enter your study notes here..."></textarea>
+        <button id="summarize-btn" type="button">Summarize</button>
+
+        <div id="summary-results" class="summary-results"></div>
+      </div>
+
+      <div class="ai-section">
+        <h3>Search Notes</h3>
+        <label for="search-query">Search Query</label>
+        <input
+          id="search-query"
+          type="text"
+          placeholder="e.g., binary search algorithm"
+        >
+        <button id="search-btn" type="button">Search Notes</button>
+
+        <div id="search-results" class="search-results"></div>
+      </div>
+    </section>
   </main>
+
+  <footer>
+    <p>&copy; StudyTrack - Keep your class list current in one place.</p>
+  </footer>
 
   <script src="app.js"></script>
 </body>
