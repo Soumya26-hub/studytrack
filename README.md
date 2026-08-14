@@ -95,6 +95,12 @@ The algorithm implementations are in:
 ```text
 backend/algorithms.py
 ```
+## Complexity
+
+- **Insertion sort:** O(n²) time in the worst case and O(1) extra space.
+- **Binary search:** O(log n) time because the search range is halved each time.
+- **Roster report:** O(n) time because every student is processed once.
+- **Minimum-age count:** O(n) time because every student is checked once.
 
 ## Part 3 – AI Helper
 
