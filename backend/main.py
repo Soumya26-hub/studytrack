@@ -4,11 +4,13 @@ from typing import Literal
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from . import crud
+from .ai_service import cosine_similarity, mock_embed, notes, summarize_notes
 from .algorithms import (
     binary_search_by_name,
     count_students_meeting_min_age,
@@ -36,6 +38,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Pydantic schemas for AI endpoints
+class SummarizeRequest(BaseModel):
+    text: str
 
 
 # Run once when FastAPI starts: create tables, then seed the fixed roster only if empty.
@@ -187,6 +194,54 @@ def update_course(
 def delete_course(course_id: int, db: Session = Depends(get_db)):
     if crud.delete_course(db, course_id) is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
+
+
+# AI Assistant endpoints (Part 3)
+
+@app.post("/assistant/summarize")
+def summarize(request: SummarizeRequest):
+    """
+    Summarize study notes using offline mock AI.
+
+    Request body: {"text": "<raw notes>"}
+
+    Returns: {"topic": str, "key_points": list[str], "difficulty": str}
+
+    No API key or network call required.
+    """
+    return summarize_notes(request.text)
+
+
+@app.get("/assistant/search")
+def search_notes(query: str = ""):
+    """
+    Semantic search over fixed notes dataset using mock embeddings.
+
+    Query parameter: query=<text>
+
+    Returns: list of notes with similarity scores, sorted by score descending.
+
+    If query is empty or all zeros, returns all notes with 0.0 scores in original order.
+    Never raises ZeroDivisionError.
+    """
+    query_vector = mock_embed(query)
+
+    results = []
+    for note in notes:
+        note_vector = mock_embed(note["text"])
+        similarity = cosine_similarity(query_vector, note_vector)
+        results.append(
+            {
+                "id": note["id"],
+                "text": note["text"],
+                "similarity": similarity,
+            }
+        )
+
+    # Sort by similarity descending, but preserve original order for ties/zeros
+    results.sort(key=lambda x: (-x["similarity"], x["id"]))
+
+    return results
 
 
 frontend_directory = Path(__file__).resolve().parent.parent / "frontend"
