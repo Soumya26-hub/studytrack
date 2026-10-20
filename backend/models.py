@@ -10,10 +10,10 @@ class Student(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False, index=True)
-    age = Column(Integer)
+    age = Column(Integer, nullable=False)
 
-    # A student can have many enrolled courses.
-    courses = relationship("Course", back_populates="student")
+    # A student can have many enrolled courses; deleting a student removes their enrollments.
+    courses = relationship("Course", back_populates="student", cascade="all, delete-orphan")
 
 
 class Course(Base):

@@ -23,6 +23,8 @@ SQLite, and a simple HTML/CSS/JavaScript frontend.
 
 ## Setup
 
+Requires Python 3.10 or newer.
+
 Create a virtual environment:
 
 ```bash
@@ -57,6 +59,18 @@ API documentation:
 
 http://localhost:8000/docs
 
+The SQLite database is created as `studytrack.db` in the project root. Set the
+`DATABASE_URL` environment variable to use a different location (see `.env.example`).
+
+### Running tests
+
+```bash
+pip install -r backend/requirements-dev.txt
+python -m pytest backend/tests
+```
+
+Tests use a temporary database and never touch `studytrack.db`.
+
 
 ## Part 1 – Student Roster
 
@@ -72,10 +86,24 @@ The dashboard allows users to:
 
 ```text
 POST   /students/
-GET    /students/
-PUT    /students/{student_id}
-DELETE /students/{student_id}
+GET    /students/                         (optional: min_age, skip, limit)
+GET    /students/{student_id}
+PATCH  /students/{student_id}
+DELETE /students/{student_id}             (also deletes the student's courses)
+GET    /students/{student_id}/course-count
 ```
+
+### Course Endpoints
+
+```text
+POST   /courses/
+GET    /courses/                          (optional: skip, limit)
+GET    /courses/{course_id}
+PATCH  /courses/{course_id}
+DELETE /courses/{course_id}
+```
+
+Credits must be between 1 and 6, and `student_id` must refer to an existing student.
 
 ## Part 2 – Algorithms
 
