@@ -10,6 +10,8 @@ function showStatus(message, isSuccess = false) {
 
 function showError(message) {
   errorBanner.textContent = message;
+  // Don't leave a stale success message next to a new error.
+  showStatus("");
 }
 
 function clearError() {
@@ -19,6 +21,10 @@ function clearError() {
 async function getErrorMessage(response) {
   try {
     const data = await response.json();
+    // FastAPI validation errors (422) return detail as a list of {msg, ...} objects.
+    if (Array.isArray(data.detail)) {
+      return data.detail.map((item) => item.msg).join("; ");
+    }
     return data.detail || "The request could not be completed.";
   } catch {
     return "The request could not be completed.";
@@ -73,14 +79,33 @@ function createStudentCard(student) {
   return card;
 }
 
+function renderEmptyRoster() {
+  const message = document.createElement("p");
+  message.className = "empty-roster";
+  message.textContent = "No students have been added yet.";
+  rosterList.append(message);
+}
+
+function createSummaryItem(labelText, valueText) {
+  const item = document.createElement("div");
+  item.className = "summary-item";
+  const label = document.createElement("label");
+  label.textContent = labelText;
+  item.append(label);
+  if (valueText !== undefined) {
+    const value = document.createElement("div");
+    value.className = "value";
+    value.textContent = valueText;
+    item.append(value);
+  }
+  return item;
+}
+
 function renderStudents(students) {
   rosterList.replaceChildren();
 
   if (students.length === 0) {
-    const message = document.createElement("p");
-    message.className = "empty-roster";
-    message.textContent = "No students have been added yet.";
-    rosterList.append(message);
+    renderEmptyRoster();
     return;
   }
 
@@ -125,6 +150,7 @@ async function addStudent(event) {
     studentForm.reset();
     clearError();
     showStatus("Student added successfully.", true);
+    rosterList.querySelector(".empty-roster")?.remove();
     rosterList.append(createStudentCard(newStudent));
   } catch (error) {
     showError(`Could not add student: ${error.message}`);
@@ -134,7 +160,7 @@ async function addStudent(event) {
 async function updateAge(studentId, ageInput) {
   const newAge = Number(ageInput.value);
   if (!Number.isInteger(newAge) || newAge <= 0) {
-    showStatus("Enter an age greater than zero.");
+    showError("Enter a whole-number age greater than zero.");
     return;
   }
 
@@ -180,10 +206,7 @@ async function deleteStudent(studentId) {
 
       // Show empty message if no more students
       if (rosterList.children.length === 0) {
-        const message = document.createElement("p");
-        message.className = "empty-roster";
-        message.textContent = "No students have been added yet.";
-        rosterList.append(message);
+        renderEmptyRoster();
       }
     }
   } catch (error) {
@@ -202,12 +225,21 @@ rosterList.addEventListener("click", async (event) => {
   }
 
   const studentId = button.dataset.studentId;
-  if (button.dataset.action === "save-age") {
-    const ageInput = rosterList.querySelector(`[data-age-input="${studentId}"]`);
-    await updateAge(studentId, ageInput);
-  }
-  if (button.dataset.action === "delete") {
-    await deleteStudent(studentId);
+  // Disable while the request runs so double-clicks don't send duplicate requests.
+  button.disabled = true;
+  try {
+    if (button.dataset.action === "save-age") {
+      const ageInput = rosterList.querySelector(`[data-age-input="${studentId}"]`);
+      await updateAge(studentId, ageInput);
+    }
+    if (button.dataset.action === "delete") {
+      const studentName = button.closest(".student-card")?.querySelector("h3")?.textContent;
+      if (window.confirm(`Delete ${studentName || "this student"}? Their courses will also be removed.`)) {
+        await deleteStudent(studentId);
+      }
+    }
+  } finally {
+    button.disabled = false;
   }
 });
 
@@ -226,23 +258,18 @@ async function summarizeNotes() {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to summarize notes.");
+      throw new Error(await getErrorMessage(response));
     }
 
     const summary = await response.json();
     clearError();
 
-    // Render summary results
-    summaryResults.innerHTML = "";
+    // Render summary results with textContent only: the topic is user-typed text.
+    summaryResults.replaceChildren();
 
-    const topicDiv = document.createElement("div");
-    topicDiv.className = "summary-item";
-    topicDiv.innerHTML = `<label>Topic</label><div class="value">${summary.topic}</div>`;
-    summaryResults.appendChild(topicDiv);
+    summaryResults.appendChild(createSummaryItem("Topic", summary.topic));
 
-    const keyPointsDiv = document.createElement("div");
-    keyPointsDiv.className = "summary-item";
-    keyPointsDiv.innerHTML = '<label>Key Points</label>';
+    const keyPointsDiv = createSummaryItem("Key Points");
     if (summary.key_points && summary.key_points.length > 0) {
       const ul = document.createElement("ul");
       ul.className = "key-points-list";
@@ -260,10 +287,7 @@ async function summarizeNotes() {
     }
     summaryResults.appendChild(keyPointsDiv);
 
-    const difficultyDiv = document.createElement("div");
-    difficultyDiv.className = "summary-item";
-    difficultyDiv.innerHTML = `<label>Difficulty</label><div class="value">${summary.difficulty}</div>`;
-    summaryResults.appendChild(difficultyDiv);
+    summaryResults.appendChild(createSummaryItem("Difficulty", summary.difficulty));
   } catch (error) {
     showError(`Could not summarize notes: ${error.message}`);
   }
@@ -278,14 +302,14 @@ async function searchNotes() {
     const response = await fetch(`/assistant/search?query=${encodedQuery}`);
 
     if (!response.ok) {
-      throw new Error("Failed to search notes.");
+      throw new Error(await getErrorMessage(response));
     }
 
     const results = await response.json();
     clearError();
 
     // Render search results
-    searchResults.innerHTML = "";
+    searchResults.replaceChildren();
 
     if (!results || results.length === 0) {
       const noResults = document.createElement("p");

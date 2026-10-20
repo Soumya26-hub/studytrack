@@ -35,6 +35,23 @@ notes = [
 ]
 
 
+# Fixed embedding vocabulary; index order defines the vector dimensions.
+VOCABULARY = [
+    "sort",
+    "search",
+    "binary",
+    "insertion",
+    "sql",
+    "join",
+    "fastapi",
+    "pydantic",
+    "prompt",
+    "llm",
+    "database",
+    "validate",
+]
+
+
 def summarize_notes(raw_text: str) -> dict:
     """
     Deterministic offline mock summarizer for study notes.
@@ -79,8 +96,10 @@ def summarize_notes(raw_text: str) -> dict:
     sentences = re.split(r"[.!?]", raw_text)
     for sentence in sentences:
         stripped = sentence.strip()
-        if stripped and len(key_points) < 3:
+        if stripped:
             key_points.append(stripped)
+            if len(key_points) == 3:
+                break
 
     # Determine difficulty by word count
     word_count = len(raw_text.split())
@@ -132,21 +151,6 @@ def mock_embed(text: str) -> list:
     Returns:
         list of exactly 12 floats representing word counts for each vocab term.
     """
-    vocabulary = [
-        "sort",
-        "search",
-        "binary",
-        "insertion",
-        "sql",
-        "join",
-        "fastapi",
-        "pydantic",
-        "prompt",
-        "llm",
-        "database",
-        "validate",
-    ]
-
     # Tokenize: lowercase, split on non-alphanumeric runs
     lowered = text.lower()
     tokens = re.split(r"[^a-z0-9]+", lowered)
@@ -154,11 +158,15 @@ def mock_embed(text: str) -> list:
 
     # Count exact matches for each vocabulary term
     embedding = []
-    for term in vocabulary:
+    for term in VOCABULARY:
         count = tokens.count(term)
         embedding.append(float(count))
 
     return embedding
+
+
+# The notes never change, so embed them once instead of on every search.
+note_embeddings = [mock_embed(note["text"]) for note in notes]
 
 
 def cosine_similarity(vec_a: list, vec_b: list) -> float:
